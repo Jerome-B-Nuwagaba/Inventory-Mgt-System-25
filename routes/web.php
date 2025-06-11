@@ -10,8 +10,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-});
+}) ->name('home');
+//
 
+
+Route::get('/privacy-policy', [PrivacyController::class, 'index'])->name('privacy');
+Route::get('/terms-of-service', [TermsController::class, 'index'])->name('terms');
+Route::get('/contact-us', [ContactController::class, 'index'])->name('contact');
+
+//
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
