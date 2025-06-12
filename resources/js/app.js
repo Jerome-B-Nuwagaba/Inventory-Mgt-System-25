@@ -1,7 +1,13 @@
 import './bootstrap';
+import { createApp } from 'vue';
+import ChatInterface from './components/Chat/ChatInterface.vue';
+import ChatNotification from './components/Chat/ChatNotification.vue';
 
-import Alpine from 'alpinejs';
+const app = createApp({});
 
-window.Alpine = Alpine;
+// Register components
+app.component('chat-interface', ChatInterface);
+app.component('chat-notification', ChatNotification);
 
-Alpine.start();
+// Mount the app
+app.mount('#app');
