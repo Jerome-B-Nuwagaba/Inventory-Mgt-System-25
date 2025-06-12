@@ -2,80 +2,79 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Warehouse;
-use App\Models\Car;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class WarehouseController extends Controller
 {
     public function index()
     {
-        $warehouses = Warehouse::withCount('cars')->get();
-
+        $warehouses = Warehouse::with('manager')
+            ->where('manager_id', Auth::id())
+            ->get();
         return response()->json($warehouses);
     }
 
-    /**
-     * Show warehouse details and cars inside
-     */
-    public function show($id)
-    {
-        $warehouse = Warehouse::with('cars')->findOrFail($id);
-
-        return response()->json([
-            'warehouse' => $warehouse,
-            'capacity_used' => $warehouse->cars->count(),
-            'capacity_total' => $warehouse->capacity,
-            'is_full' => $warehouse->cars->count() >= $warehouse->capacity
-        ]);
-    }
-
-    /**
-     * Store a car in a warehouse (typically from ManufacturerController)
-     */
-    public function storeCar(Request $request)
+    public function store(Request $request)
     {
         $validated = $request->validate([
-            'car_name' => 'required|string',
-            'model' => 'required|string',
-            'warehouse_id' => 'required|exists:warehouses,id',
-            'manufacturer_id' => 'required|exists:users,id'
-        ]);
-
-        $warehouse = Warehouse::findOrFail($validated['warehouse_id']);
-
-        if ($warehouse->cars()->count() >= $warehouse->capacity) {
-            return response()->json(['error' => 'Warehouse is full.'], 400);
-        }
-
-        Car::create([
-            'name' => $validated['car_name'],
-            'model' => $validated['model'],
-            'warehouse_id' => $warehouse->id,
-            'manufacturer_id' => $validated['manufacturer_id']
-        ]);
-
-        return response()->json(['message' => 'Car stored in warehouse.']);
-    }
-
-    /**
-     * Create a new warehouse (Admin use)
-     */
-    public function create(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|unique:warehouses,name',
+            'name' => 'required|string|max:255',
             'location' => 'required|string',
             'capacity' => 'required|integer|min:1',
+            'contact_number' => 'required|string',
+            'address' => 'required|string',
         ]);
 
-        $warehouse = Warehouse::create($validated);
+        $warehouse = Warehouse::create([
+            ...$validated,
+            'manager_id' => Auth::id(),
+            'current_utilization' => 0,
+            'status' => 'active',
+        ]);
 
+        return response()->json($warehouse, 201);
+    }
+
+    public function show(Warehouse $warehouse)
+    {
+        $this->authorize('view', $warehouse);
+        return response()->json($warehouse->load('manager'));
+    }
+
+    public function update(Request $request, Warehouse $warehouse)
+    {
+        $this->authorize('update', $warehouse);
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'location' => 'sometimes|string',
+            'capacity' => 'sometimes|integer|min:1',
+            'contact_number' => 'sometimes|string',
+            'address' => 'sometimes|string',
+            'status' => 'sometimes|string|in:active,inactive,maintenance',
+        ]);
+
+        $warehouse->update($validated);
+
+        return response()->json($warehouse);
+    }
+
+    public function getUtilization(Warehouse $warehouse)
+    {
+        $this->authorize('view', $warehouse);
+        
         return response()->json([
-            'message' => 'Warehouse created successfully.',
-            'warehouse' => $warehouse
+            'warehouse' => $warehouse,
+            'utilization_percentage' => $warehouse->getUtilizationPercentage(),
+            'available_space' => $warehouse->capacity - $warehouse->current_utilization,
         ]);
     }
 
-}
+    public function getInventory(Warehouse $warehouse)
+    {
+        $this->authorize('view', $warehouse);
+        
+        return response()->json($warehouse->inventory()->with('product')->get());
+    }
+} 

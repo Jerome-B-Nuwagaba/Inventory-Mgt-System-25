@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Retailer extends Model
+class Vendor extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
-        'store_name',
-        'default_delivery_address',
-        'retail_type',
+        'application_pdf_path',
+        'score',
+        'status',
     ];
 
     public function user()

@@ -33,17 +33,24 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => ['required', 'string', 'in:consumer,supplier'],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'status' => $request->role === 'supplier' ? 'pending' : 'approved',
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
+
+        if ($request->role === 'supplier') {
+            return redirect()->route('dashboard')->with('status', 'Your supplier account is pending validation. You will be notified once approved.');
+        }
 
         return redirect(route('dashboard', absolute: false));
     }

@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RawMaterial extends Model
+class Report extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'category',
+        'title',
+        'content',
+        'created_at',
+        'updated_at'
     ];
 } 
