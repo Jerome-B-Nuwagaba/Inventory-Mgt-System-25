@@ -26,6 +26,15 @@ class ValidationCriteriaController extends Controller
             'value' => 'required|string|max:255',
         ]);
 
+        // Prevent duplicate rule creation
+        $exists = ValidationRule::where('name', $request->name)
+            ->where('category', $request->category)
+            ->where('value', $request->value)
+            ->exists();
+        if ($exists) {
+            return back()->with('error', 'A validation rule with the same name, category, and value already exists.');
+        }
+
         ValidationRule::create([
             'name' => $request->name,
             'category' => $request->category,
@@ -45,7 +54,7 @@ class ValidationCriteriaController extends Controller
         $rules = ValidationRule::where('status', 'active')->get();
 
         try {
-            $response = Http::post('http://localhost:8080/api/v1/sync-rules', $rules->toArray());
+            $response = Http::post('http://localhost:8084/api/v1/sync-rules', $rules->toArray());
 
             if ($response->successful()) {
                 return back()->with('success', 'Rules synced with backend successfully!');

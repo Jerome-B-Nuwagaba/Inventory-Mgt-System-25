@@ -8,9 +8,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Notifications\UserResetPasswordNotification;
 
+/**
+ * @property \Illuminate\Notifications\DatabaseNotificationCollection $notifications
+ * @method \Illuminate\Notifications\DatabaseNotificationCollection unreadNotifications()
+ * @method \Illuminate\Notifications\DatabaseNotificationCollection notifications()
+ */
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -58,6 +62,8 @@ class User extends Authenticatable
         'extracted_data' => 'array',
         'validated_at' => 'datetime',
         'auto_visit_scheduled' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function documents()

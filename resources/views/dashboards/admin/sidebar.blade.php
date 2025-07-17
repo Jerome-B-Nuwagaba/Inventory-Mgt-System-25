@@ -1,5 +1,5 @@
 <a href="/admin/dashboard" class="nav-item {{ request()->is('admin/dashboard') ? 'active' : '' }}">
-    <i class="fas fa-home"></i> Admin Dashboard
+    <i class="fas fa-home"></i> Control Panel
 </a>
 <a href="{{ route('admin.user-management') }}" class="nav-item {{ request()->is('admin/user-management*') ? 'active' : '' }}">
     <i class="fas fa-users-cog"></i> User Management
@@ -13,9 +13,6 @@
 <a href="/admin/validation-criteria" class="nav-item {{ request()->is('admin/validation-criteria') ? 'active' : '' }}">
     <i class="fas fa-check-square"></i> Validation Criteria
 </a>
-<a href="{{ route('admin.inventory.overview') }}" class="nav-item {{ request()->is('admin/inventory-overview*') ? 'active' : '' }}">
-    <i class="fas fa-boxes"></i> Inventory Overview
-</a>
 <a href="/admin/system-flow" class="nav-item {{ request()->is('admin/system-flow') ? 'active' : '' }}">
     <i class="fas fa-project-diagram"></i> System Flow
 </a>
@@ -25,12 +22,12 @@
 <a href="/admin/reports" class="nav-item {{ request()->is('admin/reports') ? 'active' : '' }}">
     <i class="fas fa-file-alt"></i> Reports
 </a>
+<a href="{{ route('admin.chat') }}" class="nav-item {{ request()->routeIs('admin.chat') ? 'active' : '' }}">
+    <i class="fas fa-comments"></i> Chat
+</a> 
 <a href="/admin/settings" class="nav-item {{ request()->is('admin/settings') ? 'active' : '' }}">
     <i class="fas fa-cog"></i> Settings
 </a>
 <a href="/admin/backups" class="nav-item {{ request()->is('admin/backups') ? 'active' : '' }}">
     <i class="fas fa-database"></i> Backup
 </a>
-<a href="{{ route('chats.index') }}" class="nav-item {{ request()->routeIs('chats.*') ? 'active' : '' }}">
-    <i class="fas fa-comments"></i> Chat
-</a> 

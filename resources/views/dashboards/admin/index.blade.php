@@ -7,17 +7,11 @@
 @endsection
 
 @section('content')
-    @php
-        $title = 'Admin Dashboard';
-    @endphp
-
-        <h2 style="color: var(--deep-purple); margin-bottom: 1.5rem; font-size: 1.8rem;">
-            <i class="fas fa-shield-alt"></i> Admin Control Panel
-        </h2>
-        
+<div class="content-card dashboard-page">
+    <h2 style="color: var(--primary) !important; font-size: 1.8rem; margin-bottom: 1.5rem; font-weight:bold;"><i class="fas fa-tachometer-alt"></i> Overview of Controls</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
             <!-- Quick Stats -->
-            <div style="background: linear-gradient(135deg, var(--deep-purple), var(--orange)); color: white; padding: 1.5rem; border-radius: 12px;">
+            <div style="background: linear-gradient(135deg, #0b8850, #60a5fa); color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(37,99,235,0.08);">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <div style="font-size: 2rem; font-weight: bold;">{{ $pendingUsers ?? 0 }}</div>
@@ -27,7 +21,7 @@
                 </div>
             </div>
 
-            <div style="background: linear-gradient(135deg, var(--maroon), var(--orange)); color: white; padding: 1.5rem; border-radius: 12px;">
+            <div style="background: linear-gradient(135deg, #f59e42, #b35400); color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(245,158,66,0.08);">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <div style="font-size: 2rem; font-weight: bold;">{{ $totalUsers ?? 0 }}</div>
@@ -37,7 +31,7 @@
                 </div>
             </div>
 
-            <div style="background: linear-gradient(135deg, var(--blue), var(--light-cyan)); color: white; padding: 1.5rem; border-radius: 12px;">
+            <div style="background: linear-gradient(135deg, #22c55e, #388e3c); color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(34,197,94,0.08);">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <div style="font-size: 2rem; font-weight: bold;">{{ $activeUsers ?? 0 }}</div>
@@ -50,28 +44,25 @@
 
         <!-- Quick Actions -->
         <div style="margin-bottom: 2rem;">
-            <h3 style="color: var(--deep-purple); margin-bottom: 1rem; font-size: 1.3rem;">
+            <h3 style="color: var(--primary); margin-bottom: 1rem; font-size: 1.3rem;">
                 <i class="fas fa-bolt"></i> Quick Actions
             </h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-            <a href="/admin/user-management" style="display: block; padding: 1rem; background: var(--light-cyan); border-radius: 8px; text-decoration: none; color: var(--deep-purple); text-align: center; transition: transform 0.2s;">
+                <a href="/admin/user-management" style="display: block; padding: 1rem; background: linear-gradient(90deg, #2563eb 0%, #1e40af 100%); border-radius: 8px; text-decoration: none; color: #fff; text-align: center; font-weight: 600; box-shadow: 0 2px 8px rgba(37,99,235,0.08); transition: transform 0.2s, box-shadow 0.2s;">
                     <i class="fas fa-user-plus" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Review Pending Users</div>
+                    <div>Review Pending Users</div>
                 </a>
-                
-                <a href="/admin/user-management" style="display: block; padding: 1rem; background: var(--light-cyan); border-radius: 8px; text-decoration: none; color: var(--deep-purple); text-align: center; transition: transform 0.2s;">
+                <a href="/admin/user-management" style="display: block; padding: 1rem; background: linear-gradient(90deg, #2563eb 0%, #1e40af 100%); border-radius: 8px; text-decoration: none; color: #fff; text-align: center; font-weight: 600; box-shadow: 0 2px 8px rgba(37,99,235,0.08); transition: transform 0.2s, box-shadow 0.2s;">
                     <i class="fas fa-user-cog" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">Manage Users</div>
+                    <div>Manage Users</div>
                 </a>
-                
-                <a href="/admin/settings" style="display: block; padding: 1rem; background: var(--light-cyan); border-radius: 8px; text-decoration: none; color: var(--deep-purple); text-align: center; transition: transform 0.2s;">
+                <a href="/admin/settings" style="display: block; padding: 1rem; background: linear-gradient(90deg, #2563eb 0%, #1e40af 100%); border-radius: 8px; text-decoration: none; color: #fff; text-align: center; font-weight: 600; box-shadow: 0 2px 8px rgba(37,99,235,0.08); transition: transform 0.2s, box-shadow 0.2s;">
                     <i class="fas fa-cog" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">System Settings</div>
+                    <div>System Settings</div>
                 </a>
-                
-                <a href="/admin/reports" style="display: block; padding: 1rem; background: var(--light-cyan); border-radius: 8px; text-decoration: none; color: var(--deep-purple); text-align: center; transition: transform 0.2s;">
+                <a href="/admin/reports" style="display: block; padding: 1rem; background: linear-gradient(90deg, #2563eb 0%, #1e40af 100%); border-radius: 8px; text-decoration: none; color: #fff; text-align: center; font-weight: 600; box-shadow: 0 2px 8px rgba(37,99,235,0.08); transition: transform 0.2s, box-shadow 0.2s;">
                     <i class="fas fa-chart-bar" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
-                    <div style="font-weight: 600;">View Reports</div>
+                    <div>View Reports</div>
                 </a>
             </div>
         </div>
@@ -79,7 +70,7 @@
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-top: 2rem;">
         <!-- Recent Activity -->
         <div style="background: #fff; border-radius: 12px; padding: 2rem; box-shadow: var(--shadow);">
-            <h3 style="color: var(--deep-purple); margin-bottom: 1rem; font-size: 1.3rem;">
+            <h3 style="color: var(--primary); margin-bottom: 1rem; font-size: 1.3rem;">
                 <i class="fas fa-history"></i> Recent Activity
             </h3>
             @if(isset(
@@ -100,7 +91,7 @@ $recentActivities) && $recentActivities->count())
                 
         <!-- User Distribution by Role -->
         <div style="background: #fff; border-radius: 12px; padding: 2rem; box-shadow: var(--shadow);">
-            <h3 style="color: var(--deep-purple); margin-bottom: 1rem; font-size: 1.3rem;">
+            <h3 style="color: var(--primary); margin-bottom: 1rem; font-size: 1.3rem;">
                 User Distribution by Role
             </h3>
                     <div>
@@ -118,5 +109,63 @@ $recentActivities) && $recentActivities->count())
                 @endif
             </div>
         </div>
+    </div>
+
+<<<<<<< HEAD
+    @php
+        $segmentNames = [
+            1 => 'At Risk',
+            2 => 'High Value Customers',
+            3 => 'At Risk Customers',
+        ];
+    @endphp
+    <!-- Customer Segment Analytics Section -->
+    <div style="background: #fff; border-radius: 12px; padding: 2rem; box-shadow: var(--shadow); margin-top: 2rem;">
+        <h3 style="color: var(--deep-purple); margin-bottom: 1rem; font-size: 1.3rem;">
+            <i class="fas fa-users"></i> Customer Segment Distribution
+        </h3>
+        <div>
+            @if(isset($customerSegmentCounts) && count($customerSegmentCounts) > 0)
+                <ul style="list-style: none; padding: 0;">
+                    @foreach($customerSegmentCounts as $seg)
+                        <li style="margin-bottom: 0.5rem;">
+                            <strong>{{ $segmentNames[$seg->segment] ?? 'Unsegmented' }}:</strong> {{ $seg->count }} customers
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <p>No segmentation data available.</p>
+            @endif
+        </div>
+        @if(isset($segmentSummaries) && count($segmentSummaries) > 0)
+        <div style="margin-top: 2rem;">
+            <h4 style="color: var(--deep-purple);">Segment Summary Table</h4>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f0f0f0;">
+                        <th style="padding: 0.5rem; text-align: left;">Segment</th>
+                        <th style="padding: 0.5rem; text-align: left;">Avg. Total Spent</th>
+                        <th style="padding: 0.5rem; text-align: left;">Avg. Purchases</th>
+                        <th style="padding: 0.5rem; text-align: left;">Avg. Recency (days)</th>
+                        <th style="padding: 0.5rem; text-align: left;"># Customers</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($segmentSummaries as $summary)
+                    <tr>
+                        <td style="padding: 0.5rem;">{{ $segmentNames[$summary->segment] ?? 'Unsegmented' }}</td>
+                        <td style="padding: 0.5rem;">${{ number_format($summary->avg_total_spent, 2) }}</td>
+                        <td style="padding: 0.5rem;">{{ number_format($summary->avg_purchases, 2) }}</td>
+                        <td style="padding: 0.5rem;">{{ $summary->avg_recency !== null ? number_format($summary->avg_recency, 1) : 'N/A' }}</td>
+                        <td style="padding: 0.5rem;">{{ $summary->count }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
+        </div>
+=======
+>>>>>>> c68b8e0148e12445670715c10c12137215b0e64f
     </div>
 @endsection 

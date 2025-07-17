@@ -6,6 +6,8 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str; 
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,26 +21,23 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             AdminUserSeeder::class,
+            ApprovedAndPendingUsersSeeder::class,
+            VendorSeeder::class,
             ValidationRuleSeeder::class,
             FacilityVisitSeeder::class,
+            AnalystSampleDataSeeder::class,
+            DemoNotificationsSeeder::class,
+            ProductsTableSeeder::class,
+            CustomersTableSeeder::class,
+            PurchasesTableSeeder::class,
+            ManufacturerOrdersSeeder::class,
+<<<<<<< HEAD
+            CustomerSegmentDemoSeeder::class, // Add this line
+            VarietyCustomerPurchaseSeeder::class, // Add this line
+=======
+            VendorOrderSeeder::class,
+>>>>>>> c68b8e0148e12445670715c10c12137215b0e64f
         ]);
-
-        $roles = ['manufacturer', 'supplier', 'vendor', 'retailer', 'analyst'];
-
-        foreach ($roles as $role) {
-            User::firstOrCreate(
-                ['email' => $role . '@example.com'],
-                [
-                    'name' => ucfirst($role) . ' User',
-                    'password' => Hash::make('password'),
-                    'role' => $role,
-                    'status' => 'pending',
-                    'company' => ucfirst($role) . ' Company',
-                    'phone' => '123-456-7890',
-                    'address' => '123 ' . ucfirst($role) . ' Street',
-                ]
-            );
-        }
 
         // Seed demo communications for active connections
         $manufacturer = \App\Models\User::where('role', 'manufacturer')->first();
@@ -52,34 +51,9 @@ class DatabaseSeeder extends Seeder
                 'sender_id' => $manufacturer->id,
                 'receiver_id' => $supplier->id,
                 'type' => 'message',
-            ]);
-        }
-        if ($supplier && $vendor) {
-            \App\Models\Communication::create([
-                'sender_id' => $supplier->id,
-                'receiver_id' => $vendor->id,
-                'type' => 'transaction',
-            ]);
-        }
-        if ($vendor && $retailer) {
-            \App\Models\Communication::create([
-                'sender_id' => $vendor->id,
-                'receiver_id' => $retailer->id,
-                'type' => 'message',
-            ]);
-        }
-        if ($retailer && $analyst) {
-            \App\Models\Communication::create([
-                'sender_id' => $retailer->id,
-                'receiver_id' => $analyst->id,
-                'type' => 'report',
-            ]);
-        }
-        if ($analyst && $manufacturer) {
-            \App\Models\Communication::create([
-                'sender_id' => $analyst->id,
-                'receiver_id' => $manufacturer->id,
-                'type' => 'feedback',
+                'content' => 'Initial partnership discussion',
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
 
@@ -98,8 +72,6 @@ class DatabaseSeeder extends Seeder
         foreach ($items as $item) {
             \App\Models\ProcessFlow::create($item);
         }
-
-        $this->call(AnalystSampleDataSeeder::class);
 
     }
 }

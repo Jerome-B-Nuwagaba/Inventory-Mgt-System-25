@@ -11,77 +11,83 @@
 @endsection
 
 @section('content')
-    <h1 class="page-title" style="margin-bottom: 1.5rem;">User Management</h1>
+  <div class="content-card">
+    <h2 class="page-title" style="color: var(--primary, #16610E) !important; font-size: 1.8rem; margin-bottom: 1.5rem;">
+        <i class="fas fa-users-cog"></i> User Management
+    </h2>
     <!-- Stats Cards -->
-    <div class="stats-container">
-        <div class="stat-card">
-            <div>
-                <div class="stat-title">Total Users</div>
-                <div class="stat-value">{{ $stats['total'] }}</div>
+    <div class="stats-container" style="display: flex; gap: 1.5rem; margin-bottom: 2rem;">
+        <div class="stat-card" style="background: linear-gradient(135deg, #174ea6 0%, #2563eb 100%); color: #fff; box-shadow: 0 2px 8px rgba(23,78,166,0.12); border-radius: 14px; padding: 1.5rem; flex: 1; display: flex; align-items: center;">
+            <div style="flex: 1; color: #fff;">
+                <div class="stat-title" style="font-size: 1.1rem; opacity: 0.95; color: #fff;">Total Users</div>
+                <div class="stat-value" style="font-size: 2rem; font-weight: bold; color: #fff;">{{ $stats['total'] }}</div>
             </div>
-            <div class="stat-icon" style="color: #2a6eea; background: #e9f0ff;">
+            <div class="stat-icon" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; padding: 0.7rem; margin-left: 1rem;">
                 <i class="fas fa-users"></i>
             </div>
         </div>
-        <div class="stat-card">
-            <div>
-                <div class="stat-title">Active Users</div>
-                <div class="stat-value" style="color: #28a745;">{{ $stats['active'] }}</div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #15803d 0%, #166534 100%); color: #fff; box-shadow: 0 2px 8px rgba(21,128,61,0.12); border-radius: 14px; padding: 1.5rem; flex: 1; display: flex; align-items: center;">
+            <div style="flex: 1; color: #fff;">
+                <div class="stat-title" style="font-size: 1.1rem; opacity: 0.95; color: #fff;">Active Users</div>
+                <div class="stat-value" style="font-size: 2rem; font-weight: bold; color: #fff;">{{ $stats['active'] }}</div>
             </div>
-            <div class="stat-icon" style="color: #28a745; background: #e9f6ec;">
+            <div class="stat-icon" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; padding: 0.7rem; margin-left: 1rem;">
                 <i class="fas fa-user-check"></i>
             </div>
         </div>
-        <div class="stat-card">
-            <div>
-                <div class="stat-title">Inactive Users</div>
-                <div class="stat-value" style="color: #dc3545;">{{ $stats['inactive'] }}</div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); color: #fff; box-shadow: 0 2px 8px rgba(185,28,28,0.12); border-radius: 14px; padding: 1.5rem; flex: 1; display: flex; align-items: center;">
+            <div style="flex: 1; color: #fff;">
+                <div class="stat-title" style="font-size: 1.1rem; opacity: 0.95; color: #fff;">Inactive Users</div>
+                <div class="stat-value" style="font-size: 2rem; font-weight: bold; color: #fff;">{{ $stats['inactive'] }}</div>
             </div>
-            <div class="stat-icon" style="color: #dc3545; background: #f8dfe1;">
+            <div class="stat-icon" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; padding: 0.7rem; margin-left: 1rem;">
                 <i class="fas fa-user-times"></i>
             </div>
         </div>
-        <div class="stat-card">
-            <div>
-                <div class="stat-title">New This Month</div>
-                <div class="stat-value">{{ $stats['new_this_month'] }}</div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%); color: #fff; box-shadow: 0 2px 8px rgba(109,40,217,0.12); border-radius: 14px; padding: 1.5rem; flex: 1; display: flex; align-items: center;">
+            <div style="flex: 1; color: #fff;">
+                <div class="stat-title" style="font-size: 1.1rem; opacity: 0.95; color: #fff;">New This Month</div>
+                <div class="stat-value" style="font-size: 2rem; font-weight: bold; color: #fff;">{{ $stats['new_this_month'] }}</div>
             </div>
-            <div class="stat-icon" style="color: #6f42c1; background: #f1edff;">
+            <div class="stat-icon" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; padding: 0.7rem; margin-left: 1rem;">
                 <i class="fas fa-user-plus"></i>
             </div>
         </div>
     </div>
 
     <!-- Search and Filter -->
-    <div class="filter-card">
-        <h2 class="card-title">Search & Filter Users</h2>
-        <form id="filterForm" action="{{ route('admin.user-management') }}" method="GET">
-            <div class="filter-controls">
-                <div class="search-bar" style="flex-grow: 1;">
-                    <i class="fas fa-search"></i>
-                    <input type="text" name="search" placeholder="Search by name, email, or company..." value="{{ $filters['search'] ?? '' }}">
-                </div>
-                <div class="filter-role">
-                    <i class="fas fa-filter"></i>
-                    <select name="role">
-                        <option value="">All Roles</option>
-                        @php
-                            $roles = ['manufacturer', 'supplier', 'vendor', 'retailer', 'analyst'];
-                        @endphp
-                        @foreach($roles as $role)
-                            <option value="{{ $role }}" {{ ($filters['role'] ?? '') == $role ? 'selected' : '' }}>
-                                {{ ucfirst($role) }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+    <div style="background: #e9f0ff; border-radius: 14px; padding: 2rem 1.5rem 1.5rem 1.5rem; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(37,99,235,0.04);">
+        <h2 style="color: #15803d; font-size: 1.25rem; margin-bottom: 1rem; font-weight: 600;">Search & Filter Users</h2>
+        <form id="filterForm" method="GET" action="" style="display: flex; gap: 1rem; align-items: center;">
+            <input type="text" name="search" class="form-control" placeholder="Search by name, email, or company..." value="{{ request('search') }}" style="flex: 1; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0.75rem 1rem; font-size: 1rem;">
+            <div style="position: relative;">
+                <select name="role" class="form-control" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 0.75rem 2.5rem 0.75rem 1rem; font-size: 1rem; background: #fff;">
+                    <option value="">All Roles</option>
+                    <option value="manufacturer" {{ request('role') == 'manufacturer' ? 'selected' : '' }}>Manufacturer</option>
+                    <option value="supplier" {{ request('role') == 'supplier' ? 'selected' : '' }}>Supplier</option>
+                    <option value="vendor" {{ request('role') == 'vendor' ? 'selected' : '' }}>Vendor</option>
+                    <option value="retailer" {{ request('role') == 'retailer' ? 'selected' : '' }}>Retailer</option>
+                    <option value="analyst" {{ request('role') == 'analyst' ? 'selected' : '' }}>Analyst</option>
+                </select>
+                <span style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #2563eb; pointer-events: none;"><i class="fas fa-filter"></i></span>
             </div>
+            <button type="submit" class="btn btn-primary" style="background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 8px rgba(37,99,235,0.08); transition: background 0.2s;">Search</button>
         </form>
     </div>
 
+    <!-- All Users List Tabs -->
+    <div class="user-tabs" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+        <button type="button" class="tab-btn active" onclick="showUsers('active')">Active Users</button>
+        <button type="button" class="tab-btn" onclick="showUsers('inactive')">Inactive Users</button>
+    </div>
+    <style>
+        .tab-btn { padding: 0.5rem 1.5rem; border: none; background: #eee; cursor: pointer; border-radius: 5px; font-weight: 600; color: #16610E; transition: background 0.2s, color 0.2s; }
+        .tab-btn.active { background: var(--primary, #16610E); color: #fff; }
+    </style>
+
     <!-- All Users List -->
     <div class="user-list-card">
-        <h2 class="card-title">All Users ({{ $users->count() }})</h2>
+        <h2 class="card-title" style="color: var(--secondary) !important; font-size: 1.8rem; margin-bottom: 1.5rem;"><i class="fas fa-users"></i> All Users ({{ $users->count() }})</h2>
         @if(session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
@@ -89,7 +95,7 @@
         @endif
         @if($users->count() > 0)
             @foreach($users as $user)
-                <div class="user-item">
+                <div class="user-item" data-status="{{ $user->status == 'approved' ? 'active' : 'inactive' }}">
                     <div class="user-info-main">
                         <div class="user-details">
                             <span class="user-name">{{ $user->company_name ?? $user->name }}</span>
@@ -104,6 +110,7 @@
                         <div>Location: {{ $user->address ?? 'N/A' }}</div>
                         <div>Joined: {{ $user->created_at->format('Y-m-d') }}</div>
                         <div>Last Login: {{ $user->last_login_at ? \Carbon\Carbon::parse($user->last_login_at)->format('Y-m-d') : 'N/A' }}</div>
+                        <div>Segment: {{ $segmentNames[$user->segment] ?? 'Unsegmented' }}</div>
                     </div>
                     <div class="user-actions">
                         <button class="btn-action btn-view" 
@@ -117,7 +124,7 @@
                             <i class="fas fa-eye"></i> View
                         </button>
                         <a href="{{ route('admin.user.edit', $user) }}" class="btn-action btn-edit"><i class="fas fa-pencil-alt"></i> Edit</a>
-                        <form action="{{ route('admin.user.destroy', $user) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                        <form action="{{ route('admin.user.destroy', $user) }}" method="POST" style="display:inline;" class="delete-form">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn-action btn-delete"><i class="fas fa-trash"></i> Delete</button>
@@ -142,11 +149,36 @@
             </div>
         </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteUserModal" class="modal" style="display:none;">
+        <div class="modal-content" style="padding: 1.5rem 2rem; border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); background: #fff; max-width: 400px; margin: 6rem auto; position: relative; text-align: center;">
+            <h3 style="color: var(--primary, #16610E); font-size: 1.2rem; font-weight: 700; margin-bottom: 1.2rem;">Delete User?</h3>
+            <p style="margin-bottom: 2rem; color: #333;">Are you sure you want to delete this user? This action cannot be undone.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button id="cancelUserDelete" type="button" style="padding: 0.6rem 1.5rem; border-radius: 6px; border: none; background: #eee; color: #222; font-weight: 600; cursor: pointer;">Cancel</button>
+                <button id="confirmUserDelete" type="button" style="padding: 0.6rem 1.5rem; border-radius: 6px; border: none; background: var(--primary, #16610E); color: #fff; font-weight: 600; cursor: pointer;">Delete</button>
+            </div>
+        </div>
+    </div>
+  </div>
 @endsection
 
 @push('scripts')
 <script>
+function showUsers(status) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    if (status === 'active') {
+        document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+    } else {
+        document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+    }
+    document.querySelectorAll('.user-item').forEach(card => {
+        card.style.display = (card.dataset.status === status) ? '' : 'none';
+    });
+}
 document.addEventListener('DOMContentLoaded', function () {
+    showUsers('active');
     const filterForm = document.getElementById('filterForm');
     const searchInput = filterForm.querySelector('input[name="search"]');
     const roleSelect = filterForm.querySelector('select[name="role"]');
@@ -232,6 +264,31 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('click', (event) => {
         if (event.target == modal) {
             hideModal();
+        }
+    });
+
+    let userFormToDelete = null;
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            userFormToDelete = form;
+            document.getElementById('deleteUserModal').style.display = 'block';
+        });
+    });
+    document.getElementById('cancelUserDelete').onclick = function() {
+        document.getElementById('deleteUserModal').style.display = 'none';
+        userFormToDelete = null;
+    };
+    document.getElementById('confirmUserDelete').onclick = function() {
+        if (userFormToDelete) {
+            userFormToDelete.submit();
+            document.getElementById('deleteUserModal').style.display = 'none';
+        }
+    };
+    window.addEventListener('click', (event) => {
+        if (event.target == document.getElementById('deleteUserModal')) {
+            document.getElementById('deleteUserModal').style.display = 'none';
+            userFormToDelete = null;
         }
     });
 });

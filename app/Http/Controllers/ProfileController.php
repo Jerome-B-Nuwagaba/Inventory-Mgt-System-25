@@ -21,8 +21,8 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         if (session('user_role') === 'admin') {
-            $user = Admin::find(session('user_id'));
-            return view('profile.admin-edit', ['user' => $user]);
+            $user = \App\Models\Admin::find(session('user_id'));
+            return view('profile.edit', ['user' => $user]);
         }
 
         return view('profile.edit', [
@@ -64,7 +64,7 @@ class ProfileController extends Controller
         $user->fill($validated);
 
         if ($request->hasFile('profile_photo')) {
-            $path = $request->file('profile_photo')->store('profile_photos', 'public');
+            $path = \App\Models\UserDocument::storeDocument($request->file('profile_photo'));
             $user->profile_photo = $path;
             // Update or create user_documents entry for profile_picture
             \App\Models\UserDocument::updateOrCreate(

@@ -2,16 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-
 :root {
-    --deep-purple: #0F2C67;
-    --maroon: #CD1818;
-    --orange: #F3950D;
-    --light-cyan: #F4E185;
-    --white: #fff;
-    --gray: #f5f7fa;
-    --shadow: 0 4px 24px rgba(32,0,58,0.08);
-    --blue: #2a6eea;
+    --primary: #16610E;
+    --primary-light: #82d48a;
+    --secondary: #F97A00;
+    --accent: #FED16A;
+    --text-dark: #222;
+    --text-light: #666;
+    --background: #fff;
+    --text: #333333;
+    --text2: #FFF4A4;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --success: #38c172;
+    --danger: #e3342f;
+    --warning: #ffed4a;
 }
 
 * {
@@ -22,20 +26,22 @@
 
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
-    background: var(--gray);
+    background: var(--background);
     min-height: 100vh;
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 .dashboard-container {
     display: flex;
     min-height: 100vh;
+    overflow: hidden; /* Prevent any overflow issues */
 }
 
 /* Sidebar Styles */
 .sidebar {
-    width: 280px;
-    background: #f0f2f5; /* Light background for sidebar */
-    color: var(--deep-purple); /* Dark text for readability */
+    width: 300px; /* Increased from 280px for more space */
+    background: var(--primary);
+    color: var(--background);
     position: fixed;
     height: 100vh;
     overflow-y: auto;
@@ -61,7 +67,7 @@ body {
 .sidebar-logo {
     font-size: 1.0rem;
     font-weight: bold;
-    color: var(--deep-purple); /* Changed from light-cyan */
+    color: var(--text2);
 }
 
 .sidebar-subtitle {
@@ -86,7 +92,7 @@ body {
 .sidebar-user .user-info {
     background: transparent;
     padding: 0;
-    color: var(--deep-purple); /* Changed from white */
+    color: var(--background);
 }
 
 .sidebar-nav {
@@ -109,18 +115,21 @@ body {
 .nav-item {
     display: block;
     padding: 0.55rem 1.2rem;
-    color: #374151; /* Dark gray for nav items */
+    color: var(--background);
     text-decoration: none;
     transition: all 0.3s ease;
     border-left: 3px solid transparent;
-    font-size: 0.95rem;
+    font-size: 1.15rem; /* Increased from 0.95rem */
+    white-space: nowrap; /* Prevent word break */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Add ... if text is too long */
 }
 
 .nav-item:hover,
 .nav-item.active {
-    background: #e5e7eb; /* Light gray background on hover/active */
-    border-left-color: #0267c1;
-    color: #0267c1;
+    background: rgba(255,255,255,0.1);
+    border-left-color: var(--secondary);
+    color: var(--secondary);
 }
 
 .nav-item i {
@@ -136,11 +145,12 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden; /* Prevent horizontal scroll */
 }
 
 /* Header */
 .header {
-    background: var(--white);
+    background: var(--background);
     padding: 1rem 2rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     display: flex;
@@ -162,14 +172,14 @@ body {
     background: none;
     border: none;
     font-size: 1.5rem;
-    color: var(--deep-purple);
+    color: var(--primary);
     cursor: pointer;
 }
 
 .page-title {
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--deep-purple);
+    color: var(--primary);
 }
 
 .header-right {
@@ -202,8 +212,8 @@ body {
 
 .search-bar input:focus {
     outline: none;
-    border-color: var(--blue);
-    background: var(--white);
+    border-color: var(--primary);
+    background: var(--background);
     box-shadow: 0 0 0 2px rgba(42, 110, 234, 0.2);
 }
 
@@ -211,7 +221,7 @@ body {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    background: var(--white);
+    background: var(--background);
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     width: 300px;
@@ -273,8 +283,8 @@ body {
     position: absolute;
     top: -5px;
     right: -8px;
-    background-color: var(--maroon);
-    color: var(--white);
+    background-color: var(--accent);
+    color: var(--background);
     font-size: 0.65rem;
     font-weight: bold;
     width: 18px;
@@ -283,7 +293,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid var(--white);
+    border: 2px solid var(--background);
 }
 
 .user-info {
@@ -291,26 +301,26 @@ body {
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background: var(--light-cyan);
+    background: var(--text2);
     border-radius: 8px;
-    color: var(--deep-purple);
+    color: var(--primary);
 }
 
 .user-avatar {
     width: 35px;
     height: 35px;
     border-radius: 50%;
-    background: var(--orange);
+    background: var(--secondary);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    color: var(--white);
+    color: var(--background);
 }
 
 .logout-btn {
-    background: var(--maroon);
-    color: var(--white);
+    background: var(--accent);
+    color: var(--background);
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 6px;
@@ -329,14 +339,26 @@ body {
     flex: 1;
     padding: 2rem;
     overflow-y: auto;
+    height: calc(100vh - 80px); /* Subtract header height */
+    max-height: calc(100vh - 80px);
 }
 
 .content-card {
-    background: var(--white);
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: var(--shadow);
-    margin-bottom: 2rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--background);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 /* Responsive Design */
@@ -384,4 +406,31 @@ body {
 
 .sidebar-overlay.open {
     display: block;
+}
+
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+.order-table th, .order-table td {
+    border: 1px solid #e0e0e0;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.order-table th {
+    background: #f8f8f8;
+    font-weight: 600;
+}
+
+.order-table tr:nth-child(even) {
+    background: #fafafa;
+}
+
+.order-table td:last-child, .order-table th:last-child {
+    text-align: center;
+    min-width: 140px;
 }

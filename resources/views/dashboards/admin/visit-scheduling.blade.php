@@ -16,53 +16,68 @@
 @endsection
 
 @section('content')
+  <div class="content-card">
+    <h2 class="page-title" style="color: var(--primary, #16610E) !important; font-size: 1.8rem; margin-bottom: 1.5rem;">
+        <i class="fas fa-calendar-check"></i> Visit Scheduling & Management
+    </h2>
     @if(session('success'))
         <div class="alert alert-success" style="margin-bottom: 1rem;">{{ session('success') }}</div>
     @endif
     @if(session('error'))
         <div class="alert alert-danger" style="margin-bottom: 1rem;">{{ session('error') }}</div>
     @endif
-    <h1 class="page-title">Visit Scheduling & Management</h1>
     <br>
 
     <!-- Stat Cards -->
-    <div class="stat-cards-grid">
-        <div class="stat-card">
-            <div class="stat-icon yellow"><i class="fas fa-clock"></i></div>
-            <div class="stat-info">
-                <p>Pending Requests</p>
-                <span>{{ $stats['pending'] }}</span>
+    <div class="stat-cards-grid" style="display: flex; gap: 1.5rem; margin-bottom: 2rem;">
+        <div class="stat-card" style="background: linear-gradient(135deg, #174ea6 0%, #2563eb 100%); color: #fff; border-radius: 14px; padding: 1.5rem; flex: 1; display: flex; align-items: center;">
+            <div class="stat-icon yellow" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; padding: 0.7rem; margin-right: 1rem;"><i class="fas fa-clock"></i></div>
+            <div class="stat-info" style="color: #fff;">
+                <p style="color: #fff; font-size: 1.1rem; opacity: 0.95;">Pending Requests</p>
+                <span style="color: #fff; font-size: 2rem; font-weight: bold;">{{ $stats['pending'] }}</span>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
-            <div class="stat-info">
-                <p>Approved Visits</p>
-                <span>{{ $stats['approved'] }}</span>
+        <div class="stat-card" style="background: linear-gradient(135deg, #15803d 0%, #166534 100%); color: #fff; border-radius: 14px; padding: 1.5rem; flex: 1; display: flex; align-items: center;">
+            <div class="stat-icon green" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; padding: 0.7rem; margin-right: 1rem;"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info" style="color: #fff;">
+                <p style="color: #fff; font-size: 1.1rem; opacity: 0.95;">Approved Visits</p>
+                <span style="color: #fff; font-size: 2rem; font-weight: bold;">{{ $stats['approved'] }}</span>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon red"><i class="fas fa-times-circle"></i></div>
-            <div class="stat-info">
-                <p>Rejected Visits</p>
-                <span>{{ $stats['rejected'] }}</span>
+        <div class="stat-card" style="background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); color: #fff; border-radius: 14px; padding: 1.5rem; flex: 1; display: flex; align-items: center;">
+            <div class="stat-icon red" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; padding: 0.7rem; margin-right: 1rem;"><i class="fas fa-times-circle"></i></div>
+            <div class="stat-info" style="color: #fff;">
+                <p style="color: #fff; font-size: 1.1rem; opacity: 0.95;">Rejected Visits</p>
+                <span style="color: #fff; font-size: 2rem; font-weight: bold;">{{ $stats['rejected'] }}</span>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon blue"><i class="fas fa-robot"></i></div>
-            <div class="stat-info">
-                <p>Auto-Scheduled</p>
-                <span>{{ $stats['auto_scheduled'] }}</span>
+        <div class="stat-card" style="background: linear-gradient(135deg, #eab308 0%, #a16207 100%); color: #fff; border-radius: 14px; padding: 1.5rem; flex: 1; display: flex; align-items: center;">
+            <div class="stat-icon blue" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; padding: 0.7rem; margin-right: 1rem;"><i class="fas fa-robot"></i></div>
+            <div class="stat-info" style="color: #fff;">
+                <p style="color: #fff; font-size: 1.1rem; opacity: 0.95;">Auto-Scheduled</p>
+                <span style="color: #fff; font-size: 2rem; font-weight: bold;">{{ $stats['auto_scheduled'] }}</span>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon light-green"><i class="fas fa-clipboard-check"></i></div>
-            <div class="stat-info">
-                <p>Completed This Week</p>
-                <span>{{ $stats['this_week'] }}</span>
+        <div class="stat-card" style="background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%); color: #fff; border-radius: 14px; padding: 1.5rem; flex: 1; display: flex; align-items: center;">
+            <div class="stat-icon light-green" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; padding: 0.7rem; margin-right: 1rem;"><i class="fas fa-clipboard-check"></i></div>
+            <div class="stat-info" style="color: #fff;">
+                <p style="color: #fff; font-size: 1.1rem; opacity: 0.95;">Completed This Week</p>
+                <span style="color: #fff; font-size: 2rem; font-weight: bold;">{{ $stats['this_week'] }}</span>
             </div>
         </div>
     </div>
+
+    <!-- Visit Status Tabs -->
+    <div class="visit-tabs" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+        <button type="button" class="tab-btn active" onclick="showVisits('all')">All</button>
+        <button type="button" class="tab-btn" onclick="showVisits('pending')">Pending</button>
+        <button type="button" class="tab-btn" onclick="showVisits('approved')">Approved</button>
+        <button type="button" class="tab-btn" onclick="showVisits('completed')">Completed</button>
+    </div>
+    <style>
+        .tab-btn { padding: 0.5rem 1.5rem; border: none; background: #eee; cursor: pointer; border-radius: 5px; font-weight: 600; color: #16610E; transition: background 0.2s, color 0.2s; }
+        .tab-btn.active { background: var(--primary, #16610E); color: #fff; }
+    </style>
 
     <!-- Facility Visit Requests -->
     <div class="card" style="margin-top: 2rem;">
@@ -71,7 +86,7 @@
         </div>
         <div class="card-body">
             @forelse ($visits as $visit)
-                <div class="visit-card">
+                <div class="visit-card" data-status="{{ $visit->status }}">
                     <div class="visit-main-info">
                         <div class="visit-header">
                             <h3 class="company-name">{{ $visit->company_name }}</h3>
@@ -126,6 +141,7 @@
             @endforelse
         </div>
     </div>
+  </div>
 @endsection
 
 <!-- Calendar Modal -->
@@ -209,6 +225,31 @@ function openRescheduleModal(visitId, currentDate, currentTime) {
 function closeRescheduleModal() {
     document.getElementById('rescheduleModal').classList.remove('show');
 }
+
+function showVisits(status) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    if (status === 'all') {
+        document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+    } else if (status === 'pending') {
+        document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+    } else if (status === 'approved') {
+        document.querySelector('.tab-btn:nth-child(3)').classList.add('active');
+    } else if (status === 'completed') {
+        document.querySelector('.tab-btn:nth-child(4)').classList.add('active');
+    }
+    document.querySelectorAll('.visit-card').forEach(card => {
+        if (status === 'all') {
+            card.style.display = '';
+        } else if (status === 'approved') {
+            card.style.display = (card.dataset.status === 'approved') ? '' : 'none';
+        } else {
+            card.style.display = (card.dataset.status === status) ? '' : 'none';
+        }
+    });
+}
+document.addEventListener('DOMContentLoaded', function () {
+    showVisits('all');
+});
 
 // Close modals when clicking outside
 window.onclick = function(event) {

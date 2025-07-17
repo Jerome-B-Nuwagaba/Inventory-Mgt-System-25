@@ -13,7 +13,7 @@
         <div class="settings-form-grid">
             <div class="form-group">
                 <label for="name">Full Name</label>
-                <input id="name" name="name" type="text" value="{{ old('name', $user->name) }}" required autofocus />
+                <input id="name" name="name" type="text" value="{{ old('name', $user->name) }}" required />
             </div>
 
             <div class="form-group">
@@ -42,7 +42,7 @@
                 <input type="file" name="profile_photo" id="profile_photo" accept="image/*">
                 @if($user->profile_photo)
                     <div class="mt-2">
-                        <img src="{{ asset('storage/' . $user->profile_photo) }}" alt="Profile Photo" width="100" class="rounded-full border">
+                        <img src="{{ asset($user->profile_photo) }}" alt="Profile Photo" width="100" class="rounded-full border">
                     </div>
                 @endif
                 @error('profile_photo')

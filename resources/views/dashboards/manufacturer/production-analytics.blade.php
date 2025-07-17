@@ -1,14 +1,15 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Production Analytics')
+@section('title', 'Manufacturer Dashboard')
 
 @section('sidebar-content')
     @include('dashboards.manufacturer.sidebar')
 @endsection
 
 @section('content')
-    <h1 class="page-header-manufacturer">Production Analytics</h1>
-
+    <div class="content-card">
+        <h2 style="color: var(--primary); font-size: 1.8rem; margin-bottom: 1.5rem;"><i class="fas fa-chart-bar"></i> Production Analytics</h2>
+        <!-- All existing content below this line should be inside this content-card div -->
     <!-- Summary Production Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 text-center">
@@ -68,6 +69,7 @@
                 <h3 class="text-lg font-semibold">Failure Trends Over Time</h3>
                 <div class="mt-4">
                     <canvas id="failureTrendChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -82,9 +84,9 @@
     new Chart(stageDistributionCtx, {
         type: 'pie',
         data: {
-            labels: @json($stageLabels),
+            labels: JSON.parse('{!! json_encode($stageLabels) !!}'),
             datasets: [{
-                data: @json($stageData),
+                data: JSON.parse('{!! json_encode($stageData) !!}'),
                 backgroundColor: ['#A78BFA', '#6366F1', '#3B82F6', '#10B981', '#06B6D4', '#EF4444', '#6B7280'],
             }]
         },
@@ -104,13 +106,17 @@
 
     // Average Stage Duration Bar Chart
     const stageDurationCtx = document.getElementById('stageDurationChart').getContext('2d');
+    const averageStageDurations = JSON.parse('{!! json_encode($averageStageDurations) !!}');
+    const stageDurationLabels = Object.keys(averageStageDurations).map(key => key.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase()));
+    const stageDurationData = Object.values(averageStageDurations);
+
     new Chart(stageDurationCtx, {
         type: 'bar',
         data: {
-            labels: Object.keys(@json($averageStageDurations)).map(key => key.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase())),
+            labels: stageDurationLabels,
             datasets: [{
                 label: 'Average Duration (Minutes)',
-                data: Object.values(@json($averageStageDurations)),
+                data: stageDurationData,
                 backgroundColor: 'rgba(75, 192, 192, 0.6)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
@@ -144,10 +150,10 @@
     new Chart(productionRateCtx, {
         type: 'line',
         data: {
-            labels: @json($productionRateLabels),
+            labels: JSON.parse('{!! json_encode($productionRateLabels) !!}'),
             datasets: [{
                 label: 'Completed Items',
-                data: @json($productionRateData),
+                data: JSON.parse('{!! json_encode($productionRateData) !!}'),
                 backgroundColor: 'rgba(153, 102, 255, 0.2)',
                 borderColor: 'rgba(153, 102, 255, 1)',
                 borderWidth: 1,
@@ -179,10 +185,10 @@
     new Chart(failureTrendCtx, {
         type: 'line',
         data: {
-            labels: @json($failureTrendLabels),
+            labels: JSON.parse('{!! json_encode($failureTrendLabels) !!}'),
             datasets: [{
                 label: 'Failed Items',
-                data: @json($failureTrendData),
+                data: JSON.parse('{!! json_encode($failureTrendData) !!}'),
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
                 borderColor: 'rgba(255, 99, 132, 1)',
                 borderWidth: 1,

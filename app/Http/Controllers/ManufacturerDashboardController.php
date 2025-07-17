@@ -7,17 +7,76 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\SupplierStock;
 use App\Models\RetailerStock;
+use App\Models\ChecklistRequest;
+use App\Models\VendorOrder;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Customer;
+use Illuminate\Support\Facades\DB;
 
 class ManufacturerDashboardController extends Controller
 {
     public function chat()
     {
-        return view('dashboards.manufacturer.chat');
+        $userId = session('user_id') ?? Auth::id();
+        // Manufacturer can chat with suppliers, vendors, and admin
+        $users = \App\Models\User::whereIn('role', ['supplier', 'vendor'])
+            ->where('id', '!=', $userId)
+            ->get();
+        // Add admin users from the admins table
+        $adminUsers = \App\Models\Admin::where('is_active', true)
+            ->get()
+            ->map(function($admin) {
+                return (object) [
+                    'id' => 'admin_' . $admin->id,
+                    'name' => $admin->name,
+                    'email' => $admin->email,
+                    'role' => 'admin',
+                    'profile_photo' => $admin->profile_photo,
+                    'company' => $admin->company,
+                    'phone' => $admin->phone,
+                    'address' => $admin->address,
+                    'documents' => collect(),
+                ];
+            });
+        $users = $users->concat($adminUsers);
+
+        // Demo chat messages for each user (will be handled in Blade)
+        return view('dashboards.manufacturer.chat', compact('users'));
     }
 
     public function checklists()
     {
-        return view('dashboards.manufacturer.checklists');
+        $manufacturerId = session('user_id') ?? Auth::id();
+        $suppliers = \App\Models\User::where('role', 'supplier')->where('status', 'approved')->get();
+        $sentChecklists = ChecklistRequest::where('manufacturer_id', $manufacturerId)->with('supplier')->latest()->get();
+        return view('dashboards.manufacturer.checklists', compact('suppliers', 'sentChecklists'));
+    }
+
+    public function sendChecklist(Request $request)
+    {
+        $request->validate([
+            'supplier_id' => 'required|exists:users,id',
+            'materials' => 'required|array|min:1',
+            'quantities' => 'required|array|min:1',
+        ]);
+        $manufacturerId = session('user_id') ?? Auth::id();
+        $materials = $request->input('materials');
+        $quantities = $request->input('quantities');
+        $materialsRequested = [];
+        foreach ($materials as $i => $mat) {
+            $mat = trim($mat);
+            $qty = isset($quantities[$i]) ? (int)$quantities[$i] : 0;
+            if ($mat && $qty > 0) {
+                $materialsRequested[$mat] = $qty;
+            }
+        }
+        ChecklistRequest::create([
+            'manufacturer_id' => $manufacturerId,
+            'supplier_id' => $request->supplier_id,
+            'materials_requested' => $materialsRequested,
+            'status' => 'pending',
+        ]);
+        return redirect()->route('manufacturer.checklists')->with('success', 'Checklist sent to supplier!');
     }
 
     public function inventory_status()
@@ -43,7 +102,14 @@ class ManufacturerDashboardController extends Controller
 
     public function material_receipt()
     {
-        return view('dashboards.manufacturer.material-receipt');
+        $manufacturerId = session('user_id') ?? Auth::id();
+        $deliveries = \App\Models\Delivery::where('manufacturer_id', $manufacturerId)->with('supplier')->latest()->get();
+        $confirmedOrders = \App\Models\ChecklistRequest::where('manufacturer_id', $manufacturerId)
+            ->where('status', 'fulfilled')
+            ->with('supplier')
+            ->latest()
+            ->get();
+        return view('dashboards.manufacturer.material-receipt', compact('deliveries', 'confirmedOrders'));
     }
 
     public function production_lines()
@@ -304,6 +370,58 @@ class ManufacturerDashboardController extends Controller
         return view('dashboards.manufacturer.workflow');
     }
 
+    public function index()
+    {
+        $customerSegmentCounts = Customer::select('segment', DB::raw('count(*) as count'))
+            ->whereNotNull('segment')
+            ->groupBy('segment')
+            ->get();
+
+        // Use the same segment names as admin
+        $segmentNames = [
+            1 => 'Occasional Buyers',
+            2 => 'High Value Customers',
+            3 => 'At Risk Customers',
+        ];
+
+        $segmentSummaries = Customer::select(
+            'segment',
+            DB::raw('AVG((SELECT SUM(amount) FROM purchases WHERE purchases.customer_id = customers.id)) as avg_total_spent'),
+            DB::raw('AVG((SELECT COUNT(*) FROM purchases WHERE purchases.customer_id = customers.id)) as avg_purchases'),
+            DB::raw('AVG((SELECT DATEDIFF(CURDATE(), MAX(purchase_date)) FROM purchases WHERE purchases.customer_id = customers.id)) as avg_recency'),
+            DB::raw('COUNT(*) as count')
+        )
+        ->whereNotNull('segment')
+        ->groupBy('segment')
+        ->get();
+
+        // Vendor Segmentation Analytics
+        $vendorSegmentCounts = DB::table('vendors')
+            ->select('segment', DB::raw('COUNT(*) as count'))
+            ->groupBy('segment')
+            ->get();
+        $vendorSegmentSummaries = DB::table('vendors')
+            ->select('segment',
+                DB::raw('AVG(total_value) as avg_total_value'),
+                DB::raw('AVG(total_orders) as avg_orders'),
+                DB::raw('AVG(recency_days) as avg_recency'),
+                DB::raw('COUNT(*) as count')
+            )
+            ->leftJoin(DB::raw('(
+                SELECT v.id as vendor_id,
+                       COUNT(vo.id) as total_orders,
+                       COALESCE(SUM(vo.quantity * p.price), 0) as total_value,
+                       DATEDIFF(NOW(), MAX(vo.ordered_at)) as recency_days
+                FROM vendors v
+                LEFT JOIN vendor_orders vo ON v.user_id = vo.vendor_id
+                LEFT JOIN products p ON vo.product = p.name
+                GROUP BY v.id
+            ) as stats'), 'vendors.id', '=', 'stats.vendor_id')
+            ->groupBy('segment')
+            ->get();
+        return view('dashboards.manufacturer.index', compact('customerSegmentCounts', 'segmentNames', 'segmentSummaries', 'vendorSegmentCounts', 'vendorSegmentSummaries'));
+    }
+
     public function updateProcessFlowItem(Request $request)
     {
         $itemName = $request->input('item_name');
@@ -339,5 +457,75 @@ class ManufacturerDashboardController extends Controller
         $item->save();
 
         return response()->json(['message' => 'Process flow item updated successfully.']);
+    }
+
+    public function orders()
+    {
+        $manufacturerId = session('user_id') ?? Auth::id();
+        $supplierOrders = ChecklistRequest::where('manufacturer_id', $manufacturerId)->get();
+        $vendorOrders = VendorOrder::where('manufacturer_id', $manufacturerId)->get();
+        return view('dashboards.manufacturer.orders', compact('supplierOrders', 'vendorOrders'));
+    }
+
+    public function remakeOrder($id)
+    {
+        $order = \App\Models\ChecklistRequest::findOrFail($id);
+        \App\Models\ChecklistRequest::create([
+            'manufacturer_id' => $order->manufacturer_id,
+            'supplier_id' => $order->supplier_id,
+            'materials_requested' => $order->materials_requested,
+            'status' => 'pending',
+        ]);
+        return back()->with('success', 'Order has been remade and sent to the supplier!');
+    }
+
+    public function orderDelivered($id)
+    {
+        $delivery = \App\Models\Delivery::findOrFail($id);
+        $delivery->delete(); // Placeholder for closing the order
+        return back()->with('success', 'Order marked as delivered and closed.');
+    }
+
+    public function analystApplications()
+    {
+        $manufacturerId = optional(Auth::user())->id;
+        $applications = DB::table('analyst_manufacturer')
+            ->where('manufacturer_id', $manufacturerId)
+            ->join('users', 'analyst_manufacturer.analyst_id', '=', 'users.id')
+            ->select('analyst_manufacturer.*', 'users.name as analyst_name', 'users.company as analyst_company', 'users.profile_photo as analyst_photo')
+            ->get();
+        return view('dashboards.manufacturer.analyst-applications', compact('applications'));
+    }
+
+    public function approveAnalyst($applicationId)
+    {
+        $manufacturerId = optional(Auth::user())->id;
+        $application = DB::table('analyst_manufacturer')->where('id', $applicationId)->where('manufacturer_id', $manufacturerId)->first();
+        if (!$application) {
+            return back()->with('error', 'Application not found.');
+        }
+        // Approve this application
+        DB::table('analyst_manufacturer')->where('id', $applicationId)->update(['status' => 'approved', 'updated_at' => now()]);
+        // Optionally reject all other pending applications for this manufacturer
+        DB::table('analyst_manufacturer')->where('manufacturer_id', $manufacturerId)->where('id', '!=', $applicationId)->where('status', 'pending')->update(['status' => 'rejected', 'updated_at' => now()]);
+        return back()->with('success', 'Analyst approved!');
+    }
+
+    public function rejectAnalyst($applicationId)
+    {
+        $manufacturerId = optional(Auth::user())->id;
+        $application = DB::table('analyst_manufacturer')->where('id', $applicationId)->where('manufacturer_id', $manufacturerId)->first();
+        if (!$application) {
+            return back()->with('error', 'Application not found.');
+        }
+        DB::table('analyst_manufacturer')->where('id', $applicationId)->update(['status' => 'rejected', 'updated_at' => now()]);
+        return back()->with('success', 'Analyst rejected.');
+    }
+
+    public function viewAnalystPortfolio($analystId)
+    {
+        $analyst = \App\Models\User::findOrFail($analystId);
+        // You can fetch more details or reports as needed
+        return view('dashboards.manufacturer.analyst-portfolio', compact('analyst'));
     }
 }
