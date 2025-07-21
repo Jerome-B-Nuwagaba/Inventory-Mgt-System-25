@@ -1,0 +1,99 @@
+@extends('layouts.dashboard')
+
+@section('title', 'Manufacturer Dashboard')
+
+@section('sidebar-content')
+    @include('dashboards.manufacturer.sidebar')
+@endsection
+
+@section('content')
+    <div class="content-card demand-prediction-card">
+        <h2 class="demand-prediction-title"><i class="fas fa-chart-line"></i> Demand Prediction</h2>
+        <div>
+            <h1 class="text-xl font-bold mb-4">Forecast Dashboard</h1>
+            <form class="demand-prediction-form" onsubmit="event.preventDefault(); getForecast();">
+                <input id="model" placeholder="Car models (comma-separated, e.g., Camry,Civic) upto 3 models">
+                <input id="region" placeholder="Region (e.g., Toronto)">
+                <button type="submit">Get Forecast</button>
+            </form>
+            <table class="demand-prediction-table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Predicted Sales</th>
+                    </tr>
+                </thead>
+                <tbody id="forecast-table" class="text-gray-700"></tbody>
+            </table>
+            <div class="demand-prediction-chart">
+                <canvas id="forecastChart" class="mt-6 w-full max-w-xl"></canvas>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let chart;
+    async function getForecast() {
+        const region = document.getElementById("region").value;
+        const models = document.getElementById("model").value.split(',').map(m => m.trim());
+        const table = document.getElementById("forecast-table");
+        table.innerHTML = "";
+        const datasets = [];
+        const labelsSet = new Set();
+        for (const model of models) {
+            const res = await fetch("http://localhost:8001/forecast", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ model, region })
+            });
+            const data = await res.json();
+            if (data.error) {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td colspan="2">${model} → ${data.error}</td>`;
+                table.appendChild(row);
+                continue;
+            }
+            data.forEach(row => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${row.Month}</td><td>${row.Predicted}</td>`;
+                table.appendChild(tr);
+                labelsSet.add(row.Month);
+            });
+            datasets.push({
+                label: model,
+                data: data.map(d => d.Predicted),
+                backgroundColor: randomColor(),
+                borderWidth: 1
+            });
+        }
+        const labels = Array.from(labelsSet).sort();
+        if (chart) chart.destroy();
+        const ctx = document.getElementById("forecastChart").getContext("2d");
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `Forecast Comparison in ${region}`
+                    }
+                }
+            }
+        });
+    }
+    function randomColor() {
+        const r = Math.floor(100 + Math.random() * 155);
+        const g = Math.floor(100 + Math.random() * 155);
+        const b = Math.floor(100 + Math.random() * 155);
+        return `rgba(${r}, ${g}, ${b}, 0.6)`;
+    }
+</script>
+@endpush

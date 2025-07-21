@@ -4,23 +4,29 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Customer;
+use App\Models\Product;
 
 class Purchase extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'vendor_id',
+    ];
 
     public function customer()
     {
         return $this->belongsTo(Customer::class);
     }
 
-    public function retailer()
+    public function product()
     {
-        return $this->belongsTo(Retailer::class);
+        return $this->belongsTo(Product::class);
     }
 
-    public function car()
+    public function vendor()
     {
-        return $this->belongsTo(Car::class);
+        return $this->belongsTo(\App\Models\User::class, 'vendor_id');
     }
 }

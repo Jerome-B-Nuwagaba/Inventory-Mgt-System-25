@@ -7,16 +7,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Delivery extends Model
 {
-    use HasFactory;
+    protected $fillable = ['supplier_id', 'manufacturer_id', 'materials_delivered'];
 
-    public function rawMaterial()
+    protected $casts = [
+        'materials_delivered' => 'array',
+    ];
+
+use HasFactory;
+
+    public function supplier()
     {
-        return $this->belongsTo(RawMaterial::class);
+        return $this->belongsTo(User::class, 'supplier_id');
     }
-
-    public function manufacturer()
-{
-    return $this->belongsTo(Manufacturer::class);
-}
-
 }

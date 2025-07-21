@@ -2,34 +2,55 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Manufacturer extends Model
+class Manufacturer extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
-        'location',
-        'contact_email',
+        'email',
         'phone',
-        // any other relevant fields
+        'password',
+        'company',
+        'address',
+        'profile_picture',
+        'supporting_documents',
+        'manufacturing_license',
+        'quality_certification',
+        'production_capacity',
+        'specializations',
     ];
 
-    // Relationships
-    public function deliveries()
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected function casts(): array
     {
-        return $this->hasMany(Delivery::class);
+        return [
+            'supporting_documents' => 'array',
+        ];
     }
 
-    public function checklists()
+    public function user()
     {
-        return $this->hasMany(RawMaterialChecklist::class); // if you build a checklist model
+        return $this->belongsTo(User::class);
     }
 
-    public function producedCars()
+    public function analyst()
     {
-        return $this->hasMany(Car::class); // if cars are stored in a `cars` table
+        return $this->belongsToMany(
+            Analyst::class,
+            'analyst_manufacturer',
+            'manufacturer_id', // Foreign key on analyst_manufacturer
+            'analyst_id',      // Foreign key on analyst_manufacturer
+            'user_id',         // Local key on manufacturers
+            'user_id'          // Local key on analysts
+        )->withPivot('status')->withTimestamps();
     }
 }
