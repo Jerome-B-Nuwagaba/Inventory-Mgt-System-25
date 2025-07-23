@@ -107,7 +107,7 @@ Route::get('/register', function () {
 
 // Handle registration
 Route::post('/register', function (Illuminate\Http\Request $request) {
-    $request->validate([
+    $baseRules = [
         'name' => 'required|string|max:255',
         'email' => 'required|string|email|max:255|unique:users',
         'password' => 'required|string|min:8|confirmed',
@@ -116,10 +116,13 @@ Route::post('/register', function (Illuminate\Http\Request $request) {
         'address' => 'required|string|max:500',
         'company_name' => 'required|string|max:255',
         'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'supporting_documents' => 'required|array|min:1',
-        'supporting_documents.*' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:4096',
         'manufacturer_id' => 'nullable|exists:users,id',
-    ]);
+    ];
+    if ($request->role === 'vendor') {
+        $baseRules['supporting_documents'] = 'required|array|min:1';
+        $baseRules['supporting_documents.*'] = 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:4096';
+    }
+    $request->validate($baseRules);
 
     // Create user with pending status
     $user = \App\Models\User::create([
@@ -217,215 +220,6 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink
 
 Route::get('/password/enter-token', [ForgotPasswordController::class, 'showTokenForm'])->name('password.token');
 Route::post('/password/verify-token', [ForgotPasswordController::class, 'verifyToken'])->name('password.token.submit');
-
-Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-
-// Email verification routes
-Route::middleware('auth')->group(function () {
-    Route::get('verify-email', \App\Http\Controllers\Auth\EmailVerificationPromptController::class)
-        ->name('verification.notice');
-
-    Route::get('verify-email/{id}/{hash}', \App\Http\Controllers\Auth\VerifyEmailController::class)
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
-
-    Route::post('email/verification-notification', [\App\Http\Controllers\Auth\EmailVerificationNotificationController::class, 'store'])
-        ->middleware('throttle:6,1')
-        ->name('verification.send');
-
-    Route::get('confirm-password', [\App\Http\Controllers\Auth\ConfirmablePasswordController::class, 'show'])
-        ->name('password.confirm');
-
-    Route::post('confirm-password', [\App\Http\Controllers\Auth\ConfirmablePasswordController::class, 'store']);
-
-    Route::put('password', [\App\Http\Controllers\Auth\PasswordController::class, 'update'])->name('password.update');
-});
-
-// Dashboard (for testing)
-Route::get('/dashboard', function () {
-    if (!Auth::check()) {
-        return redirect()->route('login');
-    }
-    return view('dashboard');
-})->middleware(\App\Http\Middleware\PreventBackAfterLogout::class)->name('dashboard');
-
-
-// Login page
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
-// Handle login
-Route::post('/login', function (Illuminate\Http\Request $request) {
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
-
-    $email = $request->email;
-    $password = $request->password;
-
-    // Authenticate user by email and password only
-    $user = \App\Models\User::where('email', $email)->first();
-    if (!$user || !password_verify($password, $user->password)) {
-    return back()->withErrors([
-        'email' => 'The provided credentials do not match our records.',
-        ]);
-    }
-    // Optionally check if user is approved
-    if ($user->status !== 'approved') {
-        return back()->withErrors([
-            'email' => 'Your account is not approved yet.',
-        ]);
-    }
-    // Log in the user with Laravel Auth
-    Auth::login($user);
-    // Store user info in session
-    session([
-        'user_id' => $user->id,
-        'user_name' => $user->name,
-        'user_email' => $user->email,
-        'user_role' => $user->role
-    ]);
-    // Redirect to role-specific dashboard
-    switch ($user->role) {
-        case 'admin':
-            return redirect('/admin/dashboard');
-        case 'manufacturer':
-            return redirect('/manufacturer/dashboard');
-        case 'supplier':
-            return redirect('/supplier/dashboard');
-        case 'vendor':
-            return redirect('/vendor/dashboard');
-        case 'retailer':
-            return redirect('/retailer/dashboard');
-        case 'analyst':
-            return redirect('/analyst/dashboard');
-        default:
-            return redirect('/dashboard');
-    }
-});
-
-// Register page
-Route::get('/register', function () {
-    $approvedManufacturers = \App\Models\User::where('role', 'manufacturer')->where('status', 'approved')->get();
-    return view('auth.register', compact('approvedManufacturers'));
-})->name('register');
-
-// Handle registration
-Route::post('/register', function (Illuminate\Http\Request $request) {
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|string|email|max:255|unique:users',
-        'password' => 'required|string|min:8|confirmed',
-        'role' => 'required|in:manufacturer,supplier,vendor,retailer,analyst',
-        'phone' => 'required|string|max:20',
-        'address' => 'required|string|max:500',
-        'company_name' => 'required|string|max:255',
-        'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'supporting_documents' => 'required|array|min:1',
-        'supporting_documents.*' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:4096',
-        'manufacturer_id' => 'nullable|exists:users,id',
-    ]);
-
-    // Create user with pending status
-    $user = \App\Models\User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'phone' => $request->phone,
-        'password' => bcrypt($request->password),
-        'role' => $request->role,
-        'company' => $request->company_name,
-        'address' => $request->address,
-        'status' => 'pending',
-        'manufacturer_id' => $request->role === 'vendor' ? $request->manufacturer_id : null,
-    ]);
-
-    // Handle profile picture upload
-    if ($request->hasFile('profile_picture')) {
-        $profilePicture = $request->file('profile_picture');
-        $profilePictureName = time() . '_' . $profilePicture->getClientOriginalName();
-        $profilePicture->storeAs('public/profile_pictures', $profilePictureName);
-        $profilePicturePath = 'profile_pictures/' . $profilePictureName;
-        
-        // Save profile picture to user_documents table
-        \App\Models\UserDocument::create([
-            'user_id' => $user->id,
-            'document_type' => 'profile_picture',
-            'file_path' => $profilePicturePath
-        ]);
-    }
-
-    // Handle supporting documents upload
-    if ($request->hasFile('supporting_documents')) {
-        foreach ($request->file('supporting_documents') as $document) {
-            $documentName = time() . '_' . $document->getClientOriginalName();
-            $document->storeAs('public/supporting_documents', $documentName);
-            $documentPath = 'supporting_documents/' . $documentName;
-            
-            // Save each supporting document to user_documents table
-            \App\Models\UserDocument::create([
-                'user_id' => $user->id,
-                'document_type' => 'supporting_document',
-                'file_path' => $documentPath
-            ]);
-        }
-    }
-
-    // Redirect to status page
-    return redirect()->route('application.status', ['email' => $user->email])
-        ->with('status', 'Registration successful! Your application is now pending approval.');
-});
-
-// Application status page
-Route::get('/status/{email}', function ($email) {
-    $user = \App\Models\User::where('email', $email)->first();
-    
-    if (!$user) {
-        return redirect()->route('login')->with('error', 'User not found.');
-    }
-    
-    return view('auth.application-status', ['user' => $user]);
-})->name('application.status');
-
-// Application status page (alternative URL pattern)
-Route::get('/application-status', function (Request $request) {
-    $email = $request->query('email');
-    
-    if (!$email) {
-        return redirect()->route('login')->with('error', 'Email address is required.');
-    }
-    
-    $user = \App\Models\User::where('email', $email)->first();
-    
-    if (!$user) {
-        return redirect()->route('login')->with('error', 'User not found.');
-    }
-    
-    return view('auth.application-status', ['user' => $user]);
-});
-
-//Reset password page
-Route::get('/password.reset', function () {
-    return view('auth.reset-password');
-})->name('password.request');
-
-// Password reset form
-Route::get('/reset-password/{token}', function ($token) {
-    return view('auth.reset-password-form', ['token' => $token]);
-})->name('password.reset');
-
-// Password token page
-Route::get('/password/enter-token', function () {
-    return view('auth.reset-password-token');
-})->name('password.token');
-
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink'])->name('password.email');
-
-Route::get('/password/enter-token', [ForgotPasswordController::class, 'showTokenForm'])->name('password.token');
-Route::post('/password/verify-token', [ForgotPasswordController::class, 'verifyToken'])->name('password.token.submit');
-
-Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 
 // Email verification routes
 Route::middleware('auth')->group(function () {
@@ -734,7 +528,13 @@ Route::prefix('manufacturer')->middleware(\App\Http\Middleware\PreventBackAfterL
     Route::post('/vendor-orders/{id}/accept', [\App\Http\Controllers\ManufacturerVendorOrderController::class, 'accept'])->name('manufacturer.vendor-orders.accept');
     Route::post('/vendor-orders/{id}/reject', [\App\Http\Controllers\ManufacturerVendorOrderController::class, 'reject'])->name('manufacturer.vendor-orders.reject');
     Route::put('/vendor-orders/{id}/notes', [\App\Http\Controllers\ManufacturerVendorOrderController::class, 'updateNotes'])->name('manufacturer.vendor-orders.notes');
+    Route::post('/vendor-orders/{id}/confirm', [App\Http\Controllers\ManufacturerVendorOrderController::class, 'confirm'])->name('manufacturer.vendor-orders.confirm');
     Route::get('/vendor-orders/products', [\App\Http\Controllers\ManufacturerVendorOrderController::class, 'getProducts'])->name('manufacturer.vendor-orders.products');
+    Route::get('/vendor-orders/{id}/invoice-preview', [App\Http\Controllers\ManufacturerVendorOrderController::class, 'invoicePreview'])->name('manufacturer.vendor-orders.invoice-preview');
+    
+    // Demand Prediction routes
+    Route::get('/demand-prediction/options', [App\Http\Controllers\Manufacturer\DemandPrediction::class, 'getAvailableModelsAndRegions'])->name('manufacturer.demand.options');
+    Route::post('/demand-prediction/forecast', [App\Http\Controllers\Manufacturer\DemandPrediction::class, 'getDemandForecast'])->name('manufacturer.demand.forecast');
 });
 
 // Supplier dashboard routes
@@ -797,10 +597,34 @@ Route::prefix('vendor')->middleware(\App\Http\Middleware\PreventBackAfterLogout:
     Route::get('/products/{id}/edit', [\App\Http\Controllers\VendorProductController::class, 'edit'])->name('vendor.products.edit');
     Route::put('/products/{id}', [\App\Http\Controllers\VendorProductController::class, 'update'])->name('vendor.products.update');
     Route::delete('/products/{id}', [\App\Http\Controllers\VendorProductController::class, 'destroy'])->name('vendor.products.destroy');
-    Route::get('/orders', [\App\Http\Controllers\VendorOrderController::class, 'index'])->name('vendor.orders');
-    Route::post('/orders/create', [\App\Http\Controllers\VendorOrderController::class, 'store'])->name('vendor.orders.create');
-    Route::put('/orders/{id}', [\App\Http\Controllers\VendorOrderController::class, 'update'])->name('vendor.orders.update');
-    Route::delete('/orders/{id}', [\App\Http\Controllers\VendorOrderController::class, 'destroy'])->name('vendor.orders.destroy');
+    //Route::get('/orders', [\App\Http\Controllers\VendorOrderController::class, 'index'])->name('vendor.orders');
+    //Route::post('/orders/create', [\App\Http\Controllers\VendorOrderController::class, 'store'])->name('vendor.orders.create');
+    //Route::put('/orders/{id}', [\App\Http\Controllers\VendorOrderController::class, 'update'])->name('vendor.orders.update');
+    //Route::delete('/orders/{id}', [\App\Http\Controllers\VendorOrderController::class, 'destroy'])->name('vendor.orders.destroy');
+    
+    // Show details of a specific retailer order
+    Route::get('/retailer-orders/{id}', [\App\Http\Controllers\VendorRetailerOrderController::class, 'show'])
+        ->name('vendor.retailer-orders.show');
+
+    // Confirm a retailer order
+    Route::post('/retailer-orders/{id}/confirm', [\App\Http\Controllers\VendorRetailerOrderController::class, 'confirm'])
+        ->name('vendor.retailer-orders.confirm');
+
+    // Ship a retailer order
+    Route::post('/retailer-orders/{id}/ship', [\App\Http\Controllers\VendorRetailerOrderController::class, 'ship'])
+        ->name('vendor.retailer-orders.ship');
+
+    // Mark retailer order as delivered
+    Route::post('/retailer-orders/{id}/deliver', [\App\Http\Controllers\VendorRetailerOrderController::class, 'deliver'])
+        ->name('vendor.retailer-orders.deliver');
+
+    // Reject a retailer order
+    Route::post('/retailer-orders/{id}/reject', [\App\Http\Controllers\VendorRetailerOrderController::class, 'reject'])
+        ->name('vendor.retailer-orders.reject');
+
+    // Update notes on a retailer order
+    Route::post('/retailer-orders/{id}/update-notes', [\App\Http\Controllers\VendorRetailerOrderController::class, 'updateNotes'])
+        ->name('vendor.retailer-orders.update-notes');
     
     // Retailer Orders Management
     Route::get('/retailer-orders', [\App\Http\Controllers\VendorRetailerOrderController::class, 'index'])->name('vendor.retailer-orders.index');
@@ -847,7 +671,7 @@ Route::prefix('vendor')->middleware(\App\Http\Middleware\PreventBackAfterLogout:
     Route::get('/chats/{chat}/edit', [\App\Http\Controllers\ChatController::class, 'edit'])->name('chats.edit');
     Route::delete('/chats/{chat}', [\App\Http\Controllers\ChatController::class, 'destroy'])->name('chats.destroy');
     Route::get('/chats/messages/{userId}', [\App\Http\Controllers\ChatController::class, 'getChatMessages'])->name('chats.messages');
-    Route::post('/chats/send', [\App\Http\Controllers\ChatController::class, 'sendChatMessage'])->name('chats.send');
+    // Route::post('/chats/send', [\App\Http\Controllers\ChatController::class, 'sendChatMessage'])->name('chats.send'); // This line is removed as per the edit hint
     Route::get('/profile', [\App\Http\Controllers\VendorProfileController::class, 'edit'])->name('vendor.profile');
     Route::post('/profile', [\App\Http\Controllers\VendorProfileController::class, 'update'])->name('vendor.profile.update');
     Route::post('/profile/password', [\App\Http\Controllers\VendorProfileController::class, 'updatePassword'])->name('vendor.profile.password');
@@ -906,8 +730,13 @@ Route::middleware(['user_or_admin'])->group(function () {
     Route::delete('chats/messages/{message}', [ChatController::class, 'destroyMessage'])->name('chats.destroyMessage');
     Route::get('/chat', [\App\Http\Controllers\ChatController::class, 'chat'])->name('user.chat'); // Enable main chat page
     Route::get('/chats/messages/{userId}', [\App\Http\Controllers\ChatController::class, 'getChatMessages'])->name('chats.getMessages');
-    Route::post('/chats/send', [\App\Http\Controllers\ChatController::class, 'sendChatMessage'])->name('chats.send');
+    // Route::post('/chats/send', [\App\Http\Controllers\ChatController::class, 'sendChatMessage'])->name('chats.send'); // This line is removed as per the edit hint
 });
+
+// Public customer chat route (no auth required)
+Route::get('/customer/chat', [\App\Http\Controllers\ChatController::class, 'publicChat'])->name('customer.chat');
+// Public chat messages route for guests (must be before any middleware groups)
+Route::get('/chats/messages/{userId}', [\App\Http\Controllers\ChatController::class, 'getChatMessages'])->name('chats.getMessages.guest');
 
 Route::get('/vendor-segments/import', [\App\Http\Controllers\VendorAnalyticsController::class, 'importSegments'])->name('vendor.segments.import');
 Route::get('/vendor-segments/summary', [\App\Http\Controllers\VendorAnalyticsController::class, 'segmentationSummary'])->name('vendor.segments.summary');
@@ -929,3 +758,6 @@ Route::prefix('customer')->name('customer.')->group(function () {
 Route::get('/manufacturer/analytics/pdf', [AnalyticsController::class, 'exportPdf'])->name('manufacturer.analytics.pdf');
 Route::get('/manufacturer/vendor-segmentation', [\App\Http\Controllers\ManufacturerDashboardController::class, 'vendorSegmentationPage'])->name('manufacturer.vendor-segmentation');
 Route::get('/manufacturer/orders/partial', [App\Http\Controllers\ManufacturerDashboardController::class, 'ordersPartial'])->name('manufacturer.orders.partial');
+Route::get('/manufacturer/orders/{order}', [\App\Http\Controllers\ManufacturerOrderController::class, 'show'])->name('manufacturer.orders.show');
+Route::get('/manufacturer/demand-prediction/options', [\App\Http\Controllers\Manufacturer\DemandPrediction::class, 'getAvailableModelsAndRegions'])->name('manufacturer.demand-prediction.options');
+Route::get('/vendor/customer-segmentation', [\App\Http\Controllers\VendorDashboardController::class, 'customerSegmentation'])->name('vendor.customer-segmentation');

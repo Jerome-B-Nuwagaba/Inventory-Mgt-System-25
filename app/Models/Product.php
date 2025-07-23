@@ -19,6 +19,7 @@ class Product extends Model
         'stock',
         'vendor_id',
         'manufacturer_id',
+        'image_url',
     ];
     public function vendor()
     {
@@ -27,5 +28,9 @@ class Product extends Model
     public function manufacturer()
     {
         return $this->belongsTo(\App\Models\User::class, 'manufacturer_id');
+    }
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class);
     }
 }
