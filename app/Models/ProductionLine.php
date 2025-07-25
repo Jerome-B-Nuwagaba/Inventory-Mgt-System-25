@@ -11,7 +11,7 @@ class ProductionLine extends Model
 
     protected $fillable = [
         'name',
-        'product_focus',
+        
         'status',
         'throughput',
         'product_id',

@@ -17,7 +17,9 @@ class ProductionLineController extends Controller
      */
     public function index()
     {
-        $productionLines = ProductionLine::with(['product', 'retailerOrder'])->get();
+        $productionLines = ProductionLine::with(['product', 'retailerOrder'])
+                                        ->whereNotIn('current_stage', ['completed', 'failed'])
+                                        ->get();
         $products = Product::all();
         $retailerOrders = RetailerOrder::all();
         return view('dashboards.manufacturer.production-lines', compact('productionLines', 'products', 'retailerOrders'));
@@ -96,6 +98,14 @@ class ProductionLineController extends Controller
         ]);
 
         $productionLine = ProductionLine::find($id);
+
+        if ($request->input('current_stage') == 'completed') {
+            $request->merge([
+                'product_id' => null,
+                'retailer_order_id' => null,
+            ]);
+        }
+
         $productionLine->update($request->all());
 
         return redirect()->route('manufacturer.production-lines')

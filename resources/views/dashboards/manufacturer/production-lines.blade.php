@@ -20,7 +20,7 @@
                 <tr>
                     <th style="color: #333;">Line Name</th>
                     <th style="color: #333;">Assigned Item</th>
-                    <th style="color: #334C;">Current Stage</th>
+                    <th style="color: #334;">Current Stage</th>
                     <th style="color: #333;">Status</th>
                     <th style="color: #333;">Throughput (units/hr)</th>
                     <th style="color: #333;">Actions</th>
