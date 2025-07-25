@@ -29,6 +29,7 @@ use App\Http\Controllers\ManufacturerDashboardController;
 use App\Http\Controllers\VendorDashboardController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\Manufacturer\AnalyticsController;
+use App\Http\Controllers\Manufacturer\ProductionLineController;
 
 
 // Welcome page
@@ -723,7 +724,7 @@ Route::middleware(['user_or_admin'])->group(function () {
     // Route::resource('chats', ChatController::class); // Disabled to prevent redirects and enforce AJAX-only chat
     Route::post('chats/{chat}/messages', [ChatController::class, 'storeMessage'])->name('chats.storeMessage');
     Route::get('chats/order/{orderId}', [ChatController::class, 'getOrderChats'])->name('chats.getOrderChats');
-    Route::get('chats/unread', [ChatController::class, 'getUnreadMessages'])->name('chats.getUnreadMessages');
+    Route::get('/chats/unread', [ChatController::class, 'getUnreadMessages'])->name('chats.getUnreadMessages');
     Route::post('chats/{chatId}/read', [ChatController::class, 'markAsRead'])->name('chats.markAsRead');
     Route::get('chats/messages/{message}/edit', [ChatController::class, 'editMessage'])->name('chats.editMessage');
     Route::put('chats/messages/{message}', [ChatController::class, 'updateMessage'])->name('chats.updateMessage');
@@ -761,3 +762,10 @@ Route::get('/manufacturer/orders/partial', [App\Http\Controllers\ManufacturerDas
 Route::get('/manufacturer/orders/{order}', [\App\Http\Controllers\ManufacturerOrderController::class, 'show'])->name('manufacturer.orders.show');
 Route::get('/manufacturer/demand-prediction/options', [\App\Http\Controllers\Manufacturer\DemandPrediction::class, 'getAvailableModelsAndRegions'])->name('manufacturer.demand-prediction.options');
 Route::get('/vendor/customer-segmentation', [\App\Http\Controllers\VendorDashboardController::class, 'customerSegmentation'])->name('vendor.customer-segmentation');
+
+Route::prefix('manufacturer')->middleware(\App\Http\Middleware\PreventBackAfterLogout::class)->group(function () {
+    Route::get('/production-lines', [ProductionLineController::class, 'index'])->name('manufacturer.production-lines');
+    Route::post('/production-lines', [ProductionLineController::class, 'store'])->name('manufacturer.production-lines.store');
+    Route::put('/production-lines/{id}', [ProductionLineController::class, 'update'])->name('manufacturer.production-lines.update');
+    Route::delete('/production-lines/{id}', [ProductionLineController::class, 'destroy'])->name('manufacturer.production-lines.destroy');
+});

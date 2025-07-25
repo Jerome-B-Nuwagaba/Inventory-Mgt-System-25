@@ -13,6 +13,9 @@
 <a href="/manufacturer/production-analytics" class="nav-item {{ request()->is('manufacturer/production-analytics*') ? 'active' : '' }}">
     <i class="fas fa-chart-bar"></i> Production Analytics
 </a>
+<a href="/manufacturer/production-lines" class="nav-item {{ request()->is('manufacturer/production-lines*') ? 'active' : '' }}">
+    <i class="fas fa-cogs"></i> Production Lines
+</a>
 <a href="/manufacturer/production-reports" class="nav-item {{ request()->is('manufacturer/production-reports*') ? 'active' : '' }}">
     <i class="fas fa-file-alt"></i> Production Reports
 </a>

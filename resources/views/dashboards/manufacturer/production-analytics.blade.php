@@ -8,7 +8,11 @@
 
 @section('content')
     <div class="content-card">
-        <h2 style="color: var(--text); font-size: 2rem; font-weight: bold; margin-bottom: 1rem;"><i class="fas fa-chart-bar"></i> Production Analytics</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2 style="color: var(--text); font-size: 2rem; font-weight: bold;"><i class="fas fa-chart-bar"></i> Production Analytics</h2>
+            <a href="{{ route('manufacturer.production-lines') }}" class="btn btn-primary">Manage Production Lines</a>
+        </div>
+        <p style="margin-bottom: 2rem; color: #555;">This page provides a high-level overview of your production performance. The data shown here is a summary of the activities from your <a href="{{ route('manufacturer.production-lines') }}" style="color: var(--primary);">Production Lines</a>.</p>
         
         <!-- Summary Production Statistics -->
         <div style="display: flex; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap;">
