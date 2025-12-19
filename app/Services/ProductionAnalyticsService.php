@@ -2,11 +2,18 @@
 
 namespace App\Services;
 
-use App\Models\ProcessFlow;
+use App\Repositories\Contracts\ProcessFlowRepositoryInterface;
 use Carbon\Carbon;
 
 class ProductionAnalyticsService
 {
+    protected ProcessFlowRepositoryInterface $repository;
+
+    public function __construct(ProcessFlowRepositoryInterface $repository)
+    {
+        $this->repository = $repository;
+    }
+
     /**
      * Calculate all production analytics metrics.
      *
@@ -14,12 +21,12 @@ class ProductionAnalyticsService
      */
     public function getAnalyticsData(): array
     {
-        $processFlows = ProcessFlow::all();
+        $processFlows = $this->repository->getAll();
 
         // 1. Summary Production Statistics
         $totalItemsProcessed = $processFlows->count();
-        $totalCompletedItems = $processFlows->where('status', 'completed')->count();
-        $totalFailedItems = $processFlows->where('status', 'failed')->count();
+        $totalCompletedItems = $processFlows->filter->isCompleted()->count();
+        $totalFailedItems = $processFlows->filter->isFailed()->count();
         $overallYield = ($totalItemsProcessed > 0) ? round(($totalCompletedItems / $totalItemsProcessed) * 100, 2) : 0;
 
         // 2. Stage Distribution (for pie chart)
@@ -34,9 +41,9 @@ class ProductionAnalyticsService
         ];
 
         foreach ($processFlows as $flow) {
-            if ($flow->status === 'completed') {
+            if ($flow->isCompleted()) {
                 $stageCounts['completed']++;
-            } elseif ($flow->status === 'failed') {
+            } elseif ($flow->isFailed()) {
                 $stageCounts['failed']++;
             } else {
                 if (array_key_exists($flow->current_stage, $stageCounts)) {
@@ -58,22 +65,10 @@ class ProductionAnalyticsService
         ];
 
         foreach ($processFlows as $flow) {
-            if ($flow->entered_stage_at) {
-                $start = Carbon::parse($flow->entered_stage_at);
-                $end = null;
+            $duration = $flow->getDurationInMinutes();
 
-                if ($flow->status === 'completed' && $flow->completed_stage_at) {
-                    $end = Carbon::parse($flow->completed_stage_at);
-                } elseif ($flow->status === 'failed') {
-                    $end = Carbon::parse($flow->updated_at); // Use updated_at for failed items
-                } elseif ($flow->status === 'in_progress') {
-                    $end = Carbon::now(); // For items still in progress
-                }
-
-                if ($end && $flow->current_stage && array_key_exists($flow->current_stage, $stageDurations)) {
-                    $duration = $end->diffInMinutes($start); // Duration in minutes
-                    $stageDurations[$flow->current_stage][] = $duration;
-                }
+            if ($duration !== null && $flow->current_stage && array_key_exists($flow->current_stage, $stageDurations)) {
+                $stageDurations[$flow->current_stage][] = $duration;
             }
         }
 
@@ -83,7 +78,7 @@ class ProductionAnalyticsService
         }
 
         // 4. Production Rate Over Time
-        $completedItemsByDate = $processFlows->where('status', 'completed')
+        $completedItemsByDate = $processFlows->filter->isCompleted()
                                             ->groupBy(function($date) {
                                                 return Carbon::parse($date->completed_stage_at)->format('Y-m-d');
                                             })
@@ -93,7 +88,7 @@ class ProductionAnalyticsService
         $productionRateData = $completedItemsByDate->values()->toArray();
 
         // 5. Failure Trends Over Time
-        $failedItemsByDate = $processFlows->where('status', 'failed')
+        $failedItemsByDate = $processFlows->filter->isFailed()
                                         ->groupBy(function($date) {
                                             return Carbon::parse($date->updated_at)->format('Y-m-d');
                                         })
